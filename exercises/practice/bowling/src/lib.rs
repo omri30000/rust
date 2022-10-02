@@ -2,6 +2,10 @@ const ROUNDS_NUMBER: usize = 10;
 const THROW_TYPES_AMOUNT: usize = 3;
 const PINS_AMOUNT: u16 = 10;
 
+const FIRST_THROW: usize = 0;
+const SECOND_THROW: usize = 1;
+const FILL_BALL_THROW: usize = 2;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     NotEnoughPinsLeft,
@@ -47,11 +51,11 @@ impl Frame {
     }
 
     pub fn is_strike(&self) -> bool {
-        self.points[0] == PINS_AMOUNT
+        self.points[FIRST_THROW] == PINS_AMOUNT
     }
 
     pub fn is_spare(&self) -> bool {
-        self.points[0] + self.points[1] == PINS_AMOUNT
+        self.points[FIRST_THROW] + self.points[SECOND_THROW] == PINS_AMOUNT
     }
 }
 
@@ -118,11 +122,7 @@ impl BowlingGame {
                         self.move_to_next_round();
                     }
                 } else {
-                    if self.is_fill_ball {
-                        self.current_throw = ThrowType::FillBall;
-                    } else {
-                        self.current_throw = ThrowType::Second;
-                    }
+                    self.current_throw = ThrowType::Second;
                 }
             }
             ThrowType::Second => {
@@ -154,7 +154,7 @@ impl BowlingGame {
     fn add_pins_to_frames(&mut self, pins: u16) {
         match self.current_throw {
             ThrowType::First => {
-                self.frames[self.current_round].points[0] += pins;
+                self.frames[self.current_round].points[FIRST_THROW] += pins;
                 match self.previous_round_result {
                     Some(result) => match result {
                         RoundResult::Spare => {
@@ -174,14 +174,14 @@ impl BowlingGame {
                 }
             }
             ThrowType::Second => {
-                self.frames[self.current_round].points[1] += pins;
+                self.frames[self.current_round].points[SECOND_THROW] += pins;
                 if let Some(result) = self.previous_round_result {
                     if result == RoundResult::Strike {
                         self.extra_points += pins;
                     }
                 }
             }
-            ThrowType::FillBall => self.frames[self.current_round].points[2] += pins,
+            ThrowType::FillBall => self.frames[self.current_round].points[FILL_BALL_THROW] += pins,
         }
     }
 
@@ -189,15 +189,15 @@ impl BowlingGame {
         match self.current_throw {
             ThrowType::First => pins <= PINS_AMOUNT,
             ThrowType::Second => {
-                self.frames[self.current_round].points[0] + pins <= PINS_AMOUNT
+                self.frames[self.current_round].points[FIRST_THROW] + pins <= PINS_AMOUNT
                     || (self.frames[self.current_round].is_strike() && pins <= PINS_AMOUNT)
             }
             ThrowType::FillBall => {
                 (self.frames[self.current_round].is_spare() && pins <= PINS_AMOUNT)
                     || (self.frames[self.current_round].is_strike()
-                        && self.frames[self.current_round].points[1] + pins <= PINS_AMOUNT)
+                        && self.frames[self.current_round].points[SECOND_THROW] + pins <= PINS_AMOUNT)
                     || (self.frames[self.current_round].is_strike()
-                        && self.frames[self.current_round].points[1] == PINS_AMOUNT
+                        && self.frames[self.current_round].points[SECOND_THROW] == PINS_AMOUNT
                         && pins <= PINS_AMOUNT)
             }
         }
@@ -207,21 +207,20 @@ impl BowlingGame {
         self.current_round == ROUNDS_NUMBER - 1
     }
 
-    fn set_strike(&mut self) {
+    fn set_irregular_result(&mut self, result: RoundResult) {
         if self.is_last_round() {
             self.is_fill_ball = true;
         } else {
             self.two_rounds_ago_result = self.previous_round_result;
-            self.previous_round_result = Some(RoundResult::Strike);
+            self.previous_round_result = Some(result);
         }
+    }
+    
+    fn set_strike(&mut self) {
+        self.set_irregular_result(RoundResult::Strike);
     }
 
     fn set_spare(&mut self) {
-        if self.is_last_round() {
-            self.is_fill_ball = true;
-        } else {
-            self.two_rounds_ago_result = self.previous_round_result;
-            self.previous_round_result = Some(RoundResult::Spare);
-        }
+        self.set_irregular_result(RoundResult::Spare);
     }
 }
