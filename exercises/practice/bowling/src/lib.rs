@@ -84,10 +84,6 @@ impl BowlingGame {
         }
 
         self.add_pins_to_frames(pins);
-        println!(
-            "record that {} pins have been scored, in round {}, {:?} throw",
-            pins, self.current_round, self.current_throw
-        );
         self.set_next_roll();
 
         Ok(())
@@ -195,7 +191,8 @@ impl BowlingGame {
             ThrowType::FillBall => {
                 (self.frames[self.current_round].is_spare() && pins <= PINS_AMOUNT)
                     || (self.frames[self.current_round].is_strike()
-                        && self.frames[self.current_round].points[SECOND_THROW] + pins <= PINS_AMOUNT)
+                        && self.frames[self.current_round].points[SECOND_THROW] + pins
+                            <= PINS_AMOUNT)
                     || (self.frames[self.current_round].is_strike()
                         && self.frames[self.current_round].points[SECOND_THROW] == PINS_AMOUNT
                         && pins <= PINS_AMOUNT)
@@ -215,7 +212,7 @@ impl BowlingGame {
             self.previous_round_result = Some(result);
         }
     }
-    
+
     fn set_strike(&mut self) {
         self.set_irregular_result(RoundResult::Strike);
     }
