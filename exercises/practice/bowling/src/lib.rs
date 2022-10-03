@@ -180,18 +180,17 @@ impl BowlingGame {
         if self.frames[self.current_round].is_spare() && pins <= PINS_AMOUNT {
             return true;
         }
-        // If there has been a strike, pins + the score of the previous throw must be <PINS_AMOUNT> or less
-        if self.frames[self.current_round].is_strike()
-            && self.frames[self.current_round].points[SECOND_THROW] + pins <= PINS_AMOUNT
-        {
-            return true;
-        }
-        // if first and second scores equal to <PINS_AMOUNT>, pins can be <PINS_AMOUNT> or less
-        if self.frames[self.current_round].is_strike()
-            && self.frames[self.current_round].points[SECOND_THROW] == PINS_AMOUNT
-            && pins <= PINS_AMOUNT
-        {
-            return true;
+        if self.frames[self.current_round].is_strike() {
+            // If there has been a strike, pins + the score of the previous throw must be <PINS_AMOUNT> or less
+            if self.frames[self.current_round].points[SECOND_THROW] + pins <= PINS_AMOUNT {
+                return true;
+            }
+            // if first and second scores equal to <PINS_AMOUNT>, pins can be <PINS_AMOUNT> or less
+            if self.frames[self.current_round].points[SECOND_THROW] == PINS_AMOUNT
+                && pins <= PINS_AMOUNT
+            {
+                return true;
+            }
         }
         false
     }
