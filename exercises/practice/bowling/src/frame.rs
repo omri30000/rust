@@ -26,11 +26,7 @@ pub struct Frame {
 impl Frame {
     /// Summarize the score for the whole turn (max of 3 throws)
     pub fn sum_points(&self) -> u16 {
-        let mut sum = 0;
-        for throw in self.points.iter() {
-            sum += throw;
-        }
-        sum
+        self.points.iter().sum()
     }
 
     /// Check whether there has been a strike in the current turn
