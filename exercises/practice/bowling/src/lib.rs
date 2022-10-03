@@ -66,13 +66,13 @@ impl BowlingGame {
         if !self.is_game_complete {
             return None;
         }
-        let mut sum: u16 = 0;
-        for frame in self.frames.iter() {
-            sum += frame.sum_points();
-        }
-        sum += self.extra_points;
-
-        Some(sum)
+        let frames_sum = self
+            .frames
+            .iter()
+            .map(|frame| frame.sum_points())
+            .reduce(|first, second| first + second)
+            .unwrap();
+        Some(frames_sum + self.extra_points)
     }
 
     /// Set the ThrowType type for the next roll.
