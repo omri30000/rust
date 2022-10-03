@@ -21,15 +21,24 @@ enum RoundResult {
     Strike,
 }
 
+/// Represents a bowling game from the perspective of a single player
 pub struct BowlingGame {
+    /// Index of the current turn (0 - <ROUNDS_NUMBER>)
     current_round: usize,
+    /// the type of the current throw according to the rules of bowling (first, second, fill ball)
     current_throw: ThrowType,
+    /// a collection of the scores of each throw, collected in turns (aka. rounds)
     frames: [Frame; ROUNDS_NUMBER],
+    /// The extra points that should be added to the total score (as a result of strike/spare)
     extra_points: u16,
+    /// indicates whether the next throw is a fill ball one
     is_fill_ball: bool,
+    /// indicates whether the game is complete
     is_game_complete: bool,
-    two_rounds_ago_result: Option<RoundResult>,
-    previous_round_result: Option<RoundResult>,
+    /// the result of two throws ago (affects the extra points if there has been a strike)
+    two_throws_ago_result: Option<RoundResult>,
+    /// the result of the previous throw (affects the extra points if there has been a strike/spare)
+    previous_throw_result: Option<RoundResult>,
 }
 
 impl BowlingGame {
@@ -43,8 +52,8 @@ impl BowlingGame {
             extra_points: 0,
             is_fill_ball: false,
             is_game_complete: false,
-            two_rounds_ago_result: None,
-            previous_round_result: None,
+            two_throws_ago_result: None,
+            previous_throw_result: None,
         }
     }
 
@@ -98,8 +107,8 @@ impl BowlingGame {
                 if self.frames[self.current_round].is_spare() {
                     self.set_spare();
                 } else {
-                    self.two_rounds_ago_result = self.previous_round_result;
-                    self.previous_round_result = Some(RoundResult::Regular);
+                    self.two_throws_ago_result = self.previous_throw_result;
+                    self.previous_throw_result = Some(RoundResult::Regular);
                 }
                 if self.is_fill_ball {
                     self.current_throw = ThrowType::FillBall;
@@ -124,14 +133,14 @@ impl BowlingGame {
         match self.current_throw {
             ThrowType::First => {
                 self.frames[self.current_round].points[FIRST_THROW] += pins;
-                if let Some(result) = self.previous_round_result {
+                if let Some(result) = self.previous_throw_result {
                     match result {
                         RoundResult::Spare => {
                             self.extra_points += pins;
                         }
                         RoundResult::Strike => {
                             self.extra_points += pins;
-                            if let Some(round_result) = self.two_rounds_ago_result {
+                            if let Some(round_result) = self.two_throws_ago_result {
                                 if round_result == RoundResult::Strike {
                                     self.extra_points += pins;
                                 }
@@ -143,7 +152,7 @@ impl BowlingGame {
             }
             ThrowType::Second => {
                 self.frames[self.current_round].points[SECOND_THROW] += pins;
-                if let Some(result) = self.previous_round_result {
+                if let Some(result) = self.previous_throw_result {
                     if result == RoundResult::Strike {
                         self.extra_points += pins;
                     }
@@ -203,8 +212,8 @@ impl BowlingGame {
         if self.is_last_round() {
             self.is_fill_ball = true;
         } else {
-            self.two_rounds_ago_result = self.previous_round_result;
-            self.previous_round_result = Some(result);
+            self.two_throws_ago_result = self.previous_throw_result;
+            self.previous_throw_result = Some(result);
         }
     }
 
