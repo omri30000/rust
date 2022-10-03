@@ -1,6 +1,6 @@
 const SECONDS_IN_YEAR: f64 = 31557600.0;
 
-enum PlanetScale {
+pub enum PlanetScale {
     Mercury,
     Venus,
     Earth,
@@ -34,54 +34,27 @@ impl From<u64> for Duration {
 }
 
 pub trait Planet {
-    fn years_during(d: &Duration) -> f64;
+    const SCALE: PlanetScale;
+
+    fn years_during(d: &Duration) -> f64 {
+        d.0 / Self::SCALE.value()
+    }
 }
 
-pub struct Mercury;
-impl Planet for Mercury {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / PlanetScale::Mercury.value()
-    }
+macro_rules! struct_builder {
+    ($name: ident) => {
+        pub struct $name;
+        impl Planet for $name {
+            const SCALE: PlanetScale = PlanetScale::$name;
+        }
+    };
 }
-pub struct Venus;
-impl Planet for Venus {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / PlanetScale::Venus.value()
-    }
-}
-pub struct Earth;
-impl Planet for Earth {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / PlanetScale::Earth.value()
-    }
-}
-pub struct Mars;
-impl Planet for Mars {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / PlanetScale::Mars.value()
-    }
-}
-pub struct Jupiter;
-impl Planet for Jupiter {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / PlanetScale::Jupiter.value()
-    }
-}
-pub struct Saturn;
-impl Planet for Saturn {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / PlanetScale::Saturn.value()
-    }
-}
-pub struct Uranus;
-impl Planet for Uranus {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / PlanetScale::Uranus.value()
-    }
-}
-pub struct Neptune;
-impl Planet for Neptune {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / PlanetScale::Neptune.value()
-    }
-}
+
+struct_builder!(Mercury);
+struct_builder!(Venus);
+struct_builder!(Earth);
+struct_builder!(Mars);
+struct_builder!(Jupiter);
+struct_builder!(Saturn);
+struct_builder!(Uranus);
+struct_builder!(Neptune);
