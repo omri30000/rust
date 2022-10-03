@@ -2,21 +2,16 @@ use frame::*;
 
 mod frame;
 
+/// The number of turns each player has in a bowling game
 const ROUNDS_NUMBER: usize = 10;
 
+/// The index of a fill ball throw, relative to the first and second throw
 const FILL_BALL_THROW: usize = 2;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     NotEnoughPinsLeft,
     GameComplete,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-enum ThrowType {
-    First,
-    Second,
-    FillBall,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -43,7 +38,7 @@ impl BowlingGame {
             current_round: 0,
             current_throw: ThrowType::First,
             frames: [Frame {
-                points: [0; THROW_TYPES_AMOUNT],
+                points: [0; THROW_TYPES],
             }; ROUNDS_NUMBER],
             extra_points: 0,
             is_fill_ball: false,
