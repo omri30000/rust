@@ -1,9 +1,9 @@
-const ROUNDS_NUMBER: usize = 10;
-const THROW_TYPES_AMOUNT: usize = 3;
-const PINS_AMOUNT: u16 = 10;
+use frame::*;
 
-const FIRST_THROW: usize = 0;
-const SECOND_THROW: usize = 1;
+mod frame;
+
+const ROUNDS_NUMBER: usize = 10;
+
 const FILL_BALL_THROW: usize = 2;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -26,10 +26,6 @@ enum RoundResult {
     Strike,
 }
 
-#[derive(Clone, Copy)]
-struct Frame {
-    pub points: [u16; THROW_TYPES_AMOUNT],
-}
 pub struct BowlingGame {
     current_round: usize,
     current_throw: ThrowType,
@@ -39,24 +35,6 @@ pub struct BowlingGame {
     is_game_complete: bool,
     two_rounds_ago_result: Option<RoundResult>,
     previous_round_result: Option<RoundResult>,
-}
-
-impl Frame {
-    pub fn sum_points(&self) -> u16 {
-        let mut sum = 0;
-        for throw in self.points.iter() {
-            sum += throw;
-        }
-        sum
-    }
-
-    pub fn is_strike(&self) -> bool {
-        self.points[FIRST_THROW] == PINS_AMOUNT
-    }
-
-    pub fn is_spare(&self) -> bool {
-        self.points[FIRST_THROW] + self.points[SECOND_THROW] == PINS_AMOUNT
-    }
 }
 
 impl BowlingGame {
