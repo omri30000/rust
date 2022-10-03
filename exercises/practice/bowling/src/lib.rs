@@ -129,8 +129,8 @@ impl BowlingGame {
         match self.current_throw {
             ThrowType::First => {
                 self.frames[self.current_round].points[FIRST_THROW] += pins;
-                match self.previous_round_result {
-                    Some(result) => match result {
+                if let Some(result) = self.previous_round_result {
+                    match result {
                         RoundResult::Spare => {
                             self.extra_points += pins;
                         }
@@ -143,8 +143,7 @@ impl BowlingGame {
                             }
                         }
                         _ => (),
-                    },
-                    None => (),
+                    }
                 }
             }
             ThrowType::Second => {
