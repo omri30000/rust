@@ -153,6 +153,11 @@ impl BowlingGame {
         }
     }
 
+    /// Determine whether the given amount of pins is valid
+    ///
+    /// # arguments
+    ///
+    /// * `pins` - The amount of pins scored in the current throw
     fn is_pins_input_valid(&self, pins: u16) -> bool {
         match self.current_throw {
             ThrowType::First => pins <= PINS_AMOUNT,
@@ -160,16 +165,35 @@ impl BowlingGame {
                 self.frames[self.current_round].points[FIRST_THROW] + pins <= PINS_AMOUNT
                     || (self.frames[self.current_round].is_strike() && pins <= PINS_AMOUNT)
             }
-            ThrowType::FillBall => {
-                (self.frames[self.current_round].is_spare() && pins <= PINS_AMOUNT)
-                    || (self.frames[self.current_round].is_strike()
-                        && self.frames[self.current_round].points[SECOND_THROW] + pins
-                            <= PINS_AMOUNT)
-                    || (self.frames[self.current_round].is_strike()
-                        && self.frames[self.current_round].points[SECOND_THROW] == PINS_AMOUNT
-                        && pins <= PINS_AMOUNT)
-            }
+            ThrowType::FillBall => self.is_pins_valid_for_fill_ball(pins),
         }
+    }
+
+    /// Determine whether the given amount of pins is valid knowing that the
+    /// current throw is a fill ball one
+    ///
+    /// # arguments
+    ///
+    /// * `pins` - The amount of pins scored in the current throw
+    fn is_pins_valid_for_fill_ball(&self, pins: u16) -> bool {
+        // If there has been a spare, pins must be <PINS_AMOUNT> or less
+        if self.frames[self.current_round].is_spare() && pins <= PINS_AMOUNT {
+            return true;
+        }
+        // If there has been a strike, pins + the score of the previous throw must be <PINS_AMOUNT> or less
+        if self.frames[self.current_round].is_strike()
+            && self.frames[self.current_round].points[SECOND_THROW] + pins <= PINS_AMOUNT
+        {
+            return true;
+        }
+        // if first and second scores equal to <PINS_AMOUNT>, pins can be <PINS_AMOUNT> or less
+        if self.frames[self.current_round].is_strike()
+            && self.frames[self.current_round].points[SECOND_THROW] == PINS_AMOUNT
+            && pins <= PINS_AMOUNT
+        {
+            return true;
+        }
+        false
     }
 
     fn is_last_round(&self) -> bool {
